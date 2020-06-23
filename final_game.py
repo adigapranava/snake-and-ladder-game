@@ -8,7 +8,7 @@ Y=40
 STARTx = -200-X
 STARTy  = -200
 TURN = 0 
-SCOREP1 = 97
+SCOREP1 = 0
 SCOREP2 = 0
 OLD_CLICKS = 0
 NEW_CLICKS = 1 
@@ -119,7 +119,7 @@ def won():
         tur.forward(400)
         tur.right(90)
     tur.end_fill()
-    
+
 def position1(SCOREP1):
     if SCOREP1//10 % 2 == 0 and SCOREP1%10 != 0:
         p1.goto(STARTx + X/2+ SCOREP1%10 * X, STARTy - Y/2 + (SCOREP1//10 + 1) * Y)
@@ -150,8 +150,8 @@ def position2(SCOREP1):
 
 def rolling():
     n= random.randint(1,10000)
-    print(n%5 + 1)
-    return n%5 + 1
+    print("Rolled:",n%6 + 1)
+    return n%6 + 1
 
 
 def clicked():
@@ -160,10 +160,10 @@ def clicked():
     PERMISSION1 = True
     PERMISSION2 = True
     if SCOREP1 + die > 100 and TURN%2 == 0:
-            print("you cant exceed 100 :)")
+            print("Player-1,you cant exceed 100 :)")
             PERMISSION1 = False
     if SCOREP2 + die > 100 and TURN%2 == 1:
-            print("you cant exceed 100 :)")
+            print("Player-2,you cant exceed 100 :)")
             PERMISSION2 = False
     if TURN%2 == 0 and OLD_CLICKS != NEW_CLICKS and PERMISSION1 == True:            
         OLD_CLICKS = NEW_CLICKS
@@ -190,7 +190,7 @@ def clicked():
             won()
             time.sleep(2)
             exit()
-        print("p1",SCOREP1)
+        #print("p1",SCOREP1)
         NEW_CLICKS += 1
         if SCOREP1 != 1:
             JUST_STARTED1 = False
@@ -218,14 +218,18 @@ def clicked():
             won()
             time.sleep(2)
             exit()
-        print("p2",SCOREP2)
+        #print("p2",SCOREP2)
         NEW_CLICKS += 1
         if SCOREP2 != 1:
             JUST_STARTED2 = False
     if OLD_CLICKS != NEW_CLICKS:
+        if TURN%2 == 0:
+            print("\nPlayer-2,Its your turn:")
+        else:
+            print("\nPlayer-1,Its your turn:")
         TURN += 1
 
-
+print("Player-1,Its your turn:")
 turtle.listen()
 turtle.onkey(clicked,"space")
 turtle.mainloop()
