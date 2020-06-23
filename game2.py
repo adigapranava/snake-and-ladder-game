@@ -1,6 +1,8 @@
 import turtle
 import random
 import time
+from playsound import playsound
+import threading
 
 #Some constants
 X=40
@@ -19,82 +21,102 @@ CHANGED1 = False
 CHANGED2 = False
 END = 100
 PERMISSION1 = True
-PERMISSION2 = True
+
+
+def play():
+    playsound("sounds\winning.mp3")    
 
 def check_ladder(p):
-    global TURN
+    global TURN,y
     if p == 1:
         print("Ladder!!")
+        playsound("sounds\ladder.mp3")
         TURN -= 1
         return 38
     elif p == 4:
         print("Ladder!!")
+        playsound("sounds\ladder.mp3")
         TURN -= 1
         return 14
     elif p == 9:
         print("Ladder!!")
+        playsound("sounds\ladder.mp3")
         TURN -= 1
         return 31
     elif p == 21:
         print("Ladder!!")
+        playsound("sounds\ladder.mp3")
         TURN -= 1
         return 42
     elif p == 28:
         print("Ladder!!")
+        playsound("sounds\ladder.mp3")
         TURN -= 1
         return 84
     elif p == 51:
         print("Ladder!!")
+        playsound("sounds\ladder.mp3")
         TURN -= 1
         return 67
     elif p == 72:
         print("Ladder!!")
+        playsound("sounds\ladder.mp3")
         TURN -= 1
         return 91
     elif p == 80:
         print("Ladder!!")
+        playsound("sounds\ladder.mp3")
         TURN -= 1
         return 99
     else:
         return p
 
 def check_snake(p):
+    global z
     if p == 17:
         print("Snake!!")
+        playsound("sounds\snake.mp3")
         return 7
     elif p == 54:
         print("Snake!!")
+        playsound("sounds\snake.mp3")
         return 34
     elif p == 62:
         print("Snake!!")
+        playsound("sounds\snake.mp3")
         return 19
     elif p == 64:
         print("Snake!!")
+        playsound("sounds\snake.mp3")
         return 60
     elif p == 87:
         print("Snake!!")
+        playsound("sounds\snake.mp3")
         return 36
     elif p == 93:
         print("Snake!!")
+        playsound("sounds\snake.mp3")
         return 73
     elif p == 95:
         print("Snake!!")
+        playsound("sounds\snake.mp3")
         return 75
     elif p == 98:
         print("Snake!!")
+        playsound("sounds\snake.mp3")
         return 79
     else:
         return p
 
 #setting my screen
 screen = turtle.Screen()
-screen.bgpic("Snakes-And-Ladders-Board.gif")
+screen.bgpic("pics\Snakes-And-Ladders-Board.gif")
 screen.setup(430,430) 
 
 #
 p1 = turtle.Turtle()
 p1.shape("turtle")
-p1.color("black")
+p1.color("#283747")#"#00FF9E")
 p1.speed(0)
 p1.penup()
 p1.setpos(STARTx + X/2, STARTy +Y/2)
@@ -102,13 +124,17 @@ p1.speed(2)
 
 p2 = turtle.Turtle()
 p2.shape("turtle")
-p2.color("violet")
+p2.color("#7B241C")#"#590069")
 p2.speed(0)
 p2.penup()
 p2.setpos(STARTx + X/2, STARTy +Y/2)
 p2.speed(2)
 
+
 def won():
+    x = threading.Thread(target = play,args=())
+    x.start()
+
     tur = turtle.Turtle()
     tur.hideturtle()
     tur.pensize(8)
@@ -122,7 +148,7 @@ def won():
         tur.forward(400)
         tur.right(90)
     tur.color("green")
-    tur.fillcolor("green")
+    tur.fillcolor("#13C1A4")
     tur.begin_fill()
     for _ in range(4):
         tur.forward(400)
@@ -164,7 +190,7 @@ def rolling():
 
 
 def clicked():
-    global TURN, FORWARD1, FORWARD2, SCOREP1, SCOREP2, OLD_CLICKS, NEW_CLICKS, JUST_STARTED1, CHANGED1, JUST_STARTED2, CHANGED2, PERMISSION1, PERMISSION2
+    global TURN, FORWARD1, FORWARD2, SCOREP1, SCOREP2, OLD_CLICKS, NEW_CLICKS, JUST_STARTED1, CHANGED1, JUST_STARTED2, CHANGED2, PERMISSION1, PERMISSION2, y, z
     die = rolling()
     PERMISSION1 = True
     PERMISSION2 = True
@@ -235,7 +261,7 @@ def clicked():
         NEW_CLICKS += 1
         if SCOREP2 != 1:
             JUST_STARTED2 = False
-    if OLD_CLICKS != NEW_CLICKS:
+    if OLD_CLICKS != NEW_CLICKS: 
         if TURN%2 == 0:
             print("\nPlayer-2,Its your turn:")
         else:
