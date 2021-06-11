@@ -79,7 +79,7 @@ def check_snake(p):
 
 #setting my screen
 screen = turtle.Screen()
-screen.bgpic("Snakes-And-Ladders-Board.gif")
+screen.bgpic("pics/Snakes-And-Ladders-Board.gif")
 screen.setup(430,430) 
 
 #
