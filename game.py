@@ -1,86 +1,92 @@
 import turtle
 import random
 import time
+from dataclasses import dataclass
 
 #Some constants
-X=40
-Y=40
-STARTx = -200-X
-STARTy  = -200
-TURN = 0 
+CELL_WIDTH = 40
+CELL_HEIGHT = 40
+START_X = -200 + (CELL_WIDTH // 2)
+START_Y  = -200 + (CELL_HEIGHT // 2)
+ALLOW_TURN = True
+TURN = True # Whether P1 has its turn
 SCOREP1 = 0
 SCOREP2 = 0
-OLD_CLICKS = 0
-NEW_CLICKS = 1 
 END = 100
-JUST_STARTED1 = True
-JUST_STARTED2 = True
-CHANGED1 = False
-CHANGED2 = False
-END = 100
-PERMISSION1 = True
-PERMISSION2 = True
+LADDER_MAP = {
+    1: 38,
+    4: 14,
+    9: 31,
+    21: 42,
+    28: 84,
+    51: 67,
+    72: 91,
+    80: 99
+}
+SNAKE_MAP = {
+    17: 7,
+    54: 34,
+    62: 19,
+    64: 60,
+    87: 36,
+    93: 73,
+    95: 75,
+    98: 79
+}
 
-def check_ladder(p):
-    if p == 1:
-        print("Ladder!!")
-        return 38
-    elif p == 4:
-        print("Ladder!!")
-        return 14
-    elif p == 9:
-        print("Ladder!!")
-        return 31
-    elif p == 21:
-        print("Ladder!!")
-        return 42
-    elif p == 28:
-        print("Ladder!!")
-        return 84
-    elif p == 51:
-        print("Ladder!!")
-        return 67
-    elif p == 72:
-        print("Ladder!!")
-        return 91
-    elif p == 80:
-        print("Ladder!!")
-        return 99
-    else:
-        return p
+@dataclass
+class Position_info:
+    x: int
+    y: int
+    rot: int
 
-def check_snake(p):
-    if p == 17:
-        print("Snake!!")
-        return 7
-    elif p == 54:
-        print("Snake!!")
-        return 34
-    elif p == 62:
-        print("Snake!!")
-        return 19
-    elif p == 64:
-        print("Snake!!")
-        return 60
-    elif p == 87:
-        print("Snake!!")
-        return 36
-    elif p == 93:
-        print("Snake!!")
-        return 73
-    elif p == 95:
-        print("Snake!!")
-        return 75
-    elif p == 98:
-        print("Snake!!")
-        return 79
+    def to_vec(self) -> turtle.Vec2D:
+        return turtle.Vec2D(self.x, self.y)
+
+def check_ladder(pos: int) -> int:
+    global LADDER_MAP
+
+    if pos in LADDER_MAP:
+        print("Ladder!!")
+        return LADDER_MAP[pos]
     else:
-        return p
+        return pos
+
+def check_snake(pos: int) -> int:
+    global SNAKE_MAP
+
+    if pos in SNAKE_MAP:
+        print("Snake!!")
+        return SNAKE_MAP[pos]
+    else:
+        return pos
+    
+def calc_position(pos: int) -> Position_info:
+    if pos < 1:
+        info = calc_position(1)
+        info.x -= CELL_WIDTH
+        return info
+    
+    pos -= 1 #Remap from 0 - 99
+    row = pos // 10
+    column = pos % 10
+    is_odd = row % 2 == 1
+    
+    #Flip column on odd rows
+    if is_odd:
+        column = 9 - column
+        rot = 180
+    else:
+        rot = 0
+
+    return Position_info(START_X + (column * CELL_WIDTH), START_Y + (row * CELL_HEIGHT), rot)
+    
+
 
 #setting my screen
 screen = turtle.Screen()
 screen.bgpic("pics/Snakes-And-Ladders-Board.gif")
-screen.setup(430,430) 
+screen.setup(430,430)
 
 #
 p1 = turtle.Turtle()
@@ -88,7 +94,7 @@ p1.shape("turtle")
 p1.color("black")
 p1.speed(0)
 p1.penup()
-p1.setpos(STARTx + X/2, STARTy +Y/2)
+p1.setpos(calc_position(0).to_vec())
 p1.speed(2)
 
 p2 = turtle.Turtle()
@@ -96,8 +102,10 @@ p2.shape("turtle")
 p2.color("violet")
 p2.speed(0)
 p2.penup()
-p2.setpos(STARTx + X/2, STARTy +Y/2)
+p2.setpos(calc_position(0).to_vec())
 p2.speed(2)
+
+random.seed()
 
 def won():
     tur = turtle.Turtle()
@@ -120,116 +128,71 @@ def won():
         tur.right(90)
     tur.end_fill()
 
-def position1(SCOREP1):
-    if SCOREP1//10 % 2 == 0 and SCOREP1%10 != 0:
-        p1.goto(STARTx + X/2+ SCOREP1%10 * X, STARTy - Y/2 + (SCOREP1//10 + 1) * Y)
-        p1.setheading(0)
-    elif SCOREP1//10%2 == 1 and SCOREP1%10 != 0:
-        p1.goto(STARTx + 3*X/2 + (10 - SCOREP1%10) * X, STARTy - Y/2 + (SCOREP1//10 + 1) * Y)
-        p1.setheading(180)
-    elif SCOREP1//10 % 2 == 0 and SCOREP1%10 == 0:
-        p1.goto(STARTx + 3*X/2+ SCOREP1%10 * X, STARTy - 3*Y/2 + (SCOREP1//10 + 1) * Y)
-        p1.setheading(180)
-    elif SCOREP1//10%2 == 1 and SCOREP1%10 == 0:
-        p1.goto(STARTx + X/2 + (10 - SCOREP1%10) * X, STARTy - 3*Y/2 + (SCOREP1//10 + 1) * Y)
-        p1.setheading(0)
-
-def position2(SCOREP1):
-    if SCOREP1//10 % 2 == 0 and SCOREP1%10 != 0:
-        p2.goto(STARTx + X/2+ SCOREP1%10 * X, STARTy - Y/2 + (SCOREP1//10 + 1) * Y)
-        p2.setheading(0)
-    elif SCOREP1//10%2 == 1 and SCOREP1%10 != 0:
-        p2.goto(STARTx + 3*X/2 + (10 - SCOREP1%10) * X, STARTy - Y/2 + (SCOREP1//10 + 1) * Y)
-        p2.setheading(180)
-    elif SCOREP1//10 % 2 == 0 and SCOREP1%10 == 0:
-        p2.goto(STARTx + 3*X/2+ SCOREP1%10 * X, STARTy - 3*Y/2 + (SCOREP1//10 + 1) * Y)
-        p2.setheading(180)
-    elif SCOREP1//10%2 == 1 and SCOREP1%10 == 0:
-        p2.goto(STARTx + X/2 + (10 - SCOREP1%10) * X, STARTy - 3*Y/2 + (SCOREP1//10 + 1) * Y)
-        p2.setheading(0)
-
 def rolling():
-    n= random.randint(1,10000)
-    print("Rolled:",n%6 + 1)
-    return n%6 + 1
+    n = random.randint(1, 6)
+    print(f"Rolled: {n}")
+    return n
 
 
 def clicked():
-    global TURN, FORWARD1, FORWARD2, SCOREP1, SCOREP2, OLD_CLICKS, NEW_CLICKS, JUST_STARTED1, CHANGED1, JUST_STARTED2, CHANGED2, PERMISSION1, PERMISSION2
-    die = rolling()
-    PERMISSION1 = True
-    PERMISSION2 = True
-    if SCOREP1 + die > 100 and TURN%2 == 0:
-            print("Player-1,you cant exceed 100 :)")
-            PERMISSION1 = False
-    if SCOREP2 + die > 100 and TURN%2 == 1:
-            print("Player-2,you cant exceed 100 :)")
-            PERMISSION2 = False
-    if TURN%2 == 0 and OLD_CLICKS != NEW_CLICKS and PERMISSION1 == True:            
-        OLD_CLICKS = NEW_CLICKS
-        for _ in range(die):
-            if p1.pos()[0] > 200-X and CHANGED1 is False: 
-                p1.goto(p1.pos()[0], p1.pos()[1] + Y)
-                p1.setheading(180)
-                CHANGED1 = True
-                continue
-            elif p1.pos()[0] < -200 + X  and JUST_STARTED1 is False and CHANGED1 is False: 
-                p1.goto(p1.pos()[0], p1.pos()[1] + Y)
-                p1.setheading(0)
-                CHANGED1 = True
-                continue
-            p1.forward(X)
-            CHANGED1 = False
-        SCOREP1 += die
-        #check for ladder or snake here
-        SCOREP1 = check_snake(SCOREP1)
-        SCOREP1 = check_ladder(SCOREP1)
-        position1(SCOREP1)
-        if SCOREP1 == 100:
-            print("p1 won")
-            won()
-            time.sleep(2)
-            exit()
-        #print("p1",SCOREP1)
-        NEW_CLICKS += 1
-        if SCOREP1 != 1:
-            JUST_STARTED1 = False
-    elif TURN%2 == 1 and OLD_CLICKS != NEW_CLICKS and PERMISSION2 == True:          #player 2
-        OLD_CLICKS = NEW_CLICKS
-        for _ in range(die):
-            if p2.pos()[0] > 200-X and CHANGED2 is False: 
-                p2.goto(p2.pos()[0], p2.pos()[1] + Y)
-                p2.setheading(180)
-                CHANGED2 = True
-                continue
-            elif p2.pos()[0] < -200 + X  and JUST_STARTED2 is False and CHANGED2 is False: 
-                p2.goto(p2.pos()[0], p2.pos()[1] + Y)
-                p2.setheading(0)
-                CHANGED2 = True
-                continue
-            p2.forward(X)
-            CHANGED2 = False
-        SCOREP2 += die
-        #check for ladder or snake here
-        SCOREP2 = check_snake(SCOREP2)
-        SCOREP2 = check_ladder(SCOREP2)
-        position2(SCOREP2)
-        if SCOREP2 == 100:
-            won()
-            time.sleep(2)
-            exit()
-        #print("p2",SCOREP2)
-        NEW_CLICKS += 1
-        if SCOREP2 != 1:
-            JUST_STARTED2 = False
-    if OLD_CLICKS != NEW_CLICKS:
-        if TURN%2 == 0:
-            print("\nPlayer-2,Its your turn:")
-        else:
-            print("\nPlayer-1,Its your turn:")
-        TURN += 1
+    global ALLOW_TURN, TURN, SCOREP1, SCOREP2
 
-print("Player-1,Its your turn:")
+    if not ALLOW_TURN:
+        return
+    else:
+        ALLOW_TURN = False
+
+    die = rolling()
+
+    if TURN:
+        player = p1
+        score = SCOREP1
+        name = "Player 1"
+    else:
+        player = p2
+        score = SCOREP2
+        name = "Player 2"
+
+    new_score = score + die
+
+    if new_score < END:
+        # Move to new position
+        for i in range(die + 1):
+            info = calc_position(score + i)
+            player.goto(info.to_vec())
+            player.setheading(info.rot)
+        
+        # Check for ladders, then snakes
+        new_score = check_snake(check_ladder(new_score))
+        info = calc_position(new_score)
+        player.goto(info.to_vec())
+        player.setheading(info.rot)
+
+        apply_score = True
+    elif new_score > END:
+        print(f"{name}, you can't exceed 100 :)")
+        apply_score = False
+    else:
+        print(f"{name} won")
+        player.goto(calc_position(100).to_vec())
+        won()
+        time.sleep(2)
+        exit()
+
+    if TURN:
+        name = "Player 2"
+        if apply_score:
+            SCOREP1 = new_score
+    else:
+        name = "Player 1"
+        if apply_score:
+            SCOREP2 = new_score
+
+    TURN = not TURN
+    print(f"\n{name}, it's your turn")
+    ALLOW_TURN = True
+
+print("Player 1, it's your turn")
 turtle.listen()
 turtle.onkey(clicked,"space")
 turtle.mainloop()
